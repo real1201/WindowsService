@@ -101,8 +101,8 @@ namespace WindowsService123
                 log.WriteEntry($"{e.ChangeType} - {e.FullPath} \n", EventLogEntryType.Information);
             }
             catch (Exception ex) 
-            { 
-                //Console.WriteLine(ex.ToString());
+            {
+                Console.WriteLine(ex.ToString());
             }
         }
 

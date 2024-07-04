@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WindowsService123
@@ -18,7 +12,8 @@ namespace WindowsService123
         private const string path1 = @"C:\Folder1";
         private const string path2 = @"C:\Folder2";
 
-        FileSystemWatcher watcher1, watcher2;
+        private FileSystemWatcher watcher1, watcher2;
+
         public Service1()
         {
             InitializeComponent();
@@ -28,13 +23,11 @@ namespace WindowsService123
         {
             try
             {
-
                 watcher1 = new FileSystemWatcher(path1)
                 {
                     EnableRaisingEvents = true,
                     IncludeSubdirectories = true
                 };
-
 
                 watcher1.Changed += DirectoryChanged;
                 watcher1.Created += DirectoryChanged;
@@ -55,9 +48,9 @@ namespace WindowsService123
                 watcher2.Renamed += DirectoryChanged2;
 
             }
-            catch (Exception) 
-            { 
-                throw; 
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.ToString());
             }
         }
 
@@ -65,7 +58,7 @@ namespace WindowsService123
         {
             try
             {
-                string dest = Path.Combine(path2, e.Name);
+                var dest = Path.Combine(path2, e.Name);
                 if (File.Exists(dest))
                 {
                     File.Delete(e.FullPath);
@@ -76,17 +69,22 @@ namespace WindowsService123
                 }
 
                 if (!EventLog.SourceExists("myeventlog"))
-                    System.Diagnostics.EventLog.CreateEventSource("myeventlog", "myeventlog");
+                { 
+                    EventLog.CreateEventSource("myeventlog", "myeventlog"); 
+                }
                 EventLog log = new EventLog("myeventlog");
                 log.Source = "myeventlog";
-                var msg = $"{e.ChangeType} - {e.FullPath} \n";
                 var serviceLocation = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-                File.AppendAllText($"{serviceLocation}\\log.txt", msg);
-                log.WriteEntry(msg, EventLogEntryType.Information);
+                File.AppendAllText($"{serviceLocation}\\log.txt", $"{e.ChangeType} - {e.FullPath} \n");
+                log.WriteEntry($"{e.ChangeType} - {e.FullPath} \n", EventLogEntryType.Information);
             }
-            catch (Exception ex) { MessageBox.Show(ex.ToString()); }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.ToString());
+            }
         }
 
+   
 
         private void DirectoryChanged2(object sender, FileSystemEventArgs e)
         {
@@ -94,18 +92,20 @@ namespace WindowsService123
             {
                 if (!EventLog.SourceExists("myeventlog"))
                 {
-                    System.Diagnostics.EventLog.CreateEventSource("myeventlog", "myeventlog");
+                    EventLog.CreateEventSource("myeventlog", "myeventlog");
                 }
-
                 EventLog log = new EventLog("myeventlog");
                 log.Source = "myeventlog";
-                var msg = $"{e.ChangeType} - {e.FullPath} \n";
                 var serviceLocation = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-                File.AppendAllText($"{serviceLocation}\\log.txt", msg);
-                log.WriteEntry(msg, EventLogEntryType.Information);
+                File.AppendAllText($"{serviceLocation}\\log.txt", $"{e.ChangeType} - {e.FullPath} \n");
+                log.WriteEntry($"{e.ChangeType} - {e.FullPath} \n", EventLogEntryType.Information);
             }
-            catch (Exception) { throw; }
+            catch (Exception ex) 
+            { 
+                Console.WriteLine(ex.ToString()); 
+            }
         }
+
 
         protected override void OnStop()
         {
